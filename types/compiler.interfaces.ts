@@ -67,6 +67,7 @@ export type CompilerInfo = {
     // (interpreted || supportsBinary) && supportsExecute
     supportsExecute?: boolean;
     supportsGccDump?: boolean;
+    supportsCflatDump?: boolean;
     supportsFiltersInBinary?: boolean;
     supportsOptOutput?: boolean;
     supportsPpView?: boolean;
@@ -125,6 +126,7 @@ export type CompilerInfo = {
     optArg?: string;
     externalparser: any;
     removeEmptyGccDump?: boolean;
+    removeEmptyCflatDump?: boolean;
     irArg?: string[];
     minIrArgs?: string[];
     llvmOptArg?: string[];

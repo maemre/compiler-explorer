@@ -24,6 +24,7 @@
 
 import {ParseFiltersAndOutputOptions} from '../types/features/filters.interfaces.js';
 import {GccDumpViewState} from './panes/gccdump-view.interfaces.js';
+import {CflatDumpViewState} from './panes/cflatdump-view.interfaces.js';
 
 import {
     EmptyCompilerState,
@@ -52,6 +53,8 @@ import {
     PopulatedAstViewState,
     EmptyGccDumpViewState,
     PopulatedGccDumpViewState,
+    EmptyCflatDumpViewState,
+    PopulatedCflatDumpViewState,
     EmptyCfgViewState,
     PopulatedCfgViewState,
     PopulatedConformanceViewState,
@@ -88,6 +91,7 @@ import {
     PP_VIEW_COMPONENT_NAME,
     AST_VIEW_COMPONENT_NAME,
     GCC_DUMP_VIEW_COMPONENT_NAME,
+    CFLAT_DUMP_VIEW_COMPONENT_NAME,
     CFG_VIEW_COMPONENT_NAME,
     CONFORMANCE_VIEW_COMPONENT_NAME,
     IR_VIEW_COMPONENT_NAME,
@@ -486,6 +490,15 @@ export function getGccDumpView(): ComponentConfig<EmptyGccDumpViewState> {
     };
 }
 
+/** Get an empty cflat dump view component. */
+export function getCflatDumpView(): ComponentConfig<EmptyCflatDumpViewState> {
+    return {
+        type: 'component',
+        componentName: CFLAT_DUMP_VIEW_COMPONENT_NAME,
+        componentState: {},
+    };
+}
+
 /** Get a gcc dump view with the given configuration. */
 export function getGccDumpViewWith(
     id: number,
@@ -506,6 +519,30 @@ export function getGccDumpViewWith(
 
             // & GccDumpFiltersState
             ...gccDumpOutput,
+        },
+    };
+}
+
+/** Get a cflat dump view with the given configuration. */
+export function getCflatDumpViewWith(
+    id: number,
+    compilerName: string,
+    editorid: number,
+    treeid: number,
+    cflatDumpOutput: CflatDumpViewState,
+): ComponentConfig<PopulatedCflatDumpViewState> {
+    return {
+        type: 'component',
+        componentName: CFLAT_DUMP_VIEW_COMPONENT_NAME,
+        componentState: {
+            // PopulatedCflatDumpViewState
+            id,
+            compilerName,
+            editorid,
+            treeid,
+
+            // & CflatDumpFiltersState
+            ...cflatDumpOutput,
         },
     };
 }

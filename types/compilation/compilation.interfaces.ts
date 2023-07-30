@@ -24,6 +24,7 @@
 
 import {BuildEnvDownloadInfo} from '../../lib/buildenvsetup/buildenv.interfaces.js';
 import {IAsmParser} from '../../lib/parsers/asm-parser.interfaces.js';
+import type {CflatDumpViewSelectedPass} from '../../static/panes/cflatdump-view.interfaces.js';
 import type {GccDumpViewSelectedPass} from '../../static/panes/gccdump-view.interfaces.js';
 import type {PPOptions} from '../../static/panes/pp-view.interfaces.js';
 import {CompilerInfo} from '../compiler.interfaces.js';
@@ -65,6 +66,13 @@ export type CompilationRequestOptions = {
             treeDump?: boolean;
             rtlDump?: boolean;
             ipaDump?: boolean;
+            dumpFlags: any;
+        };
+        produceCflatDump?: {
+            opened: boolean;
+            pass?: CflatDumpViewSelectedPass;
+            inliningDump?: boolean;
+            codeGenDump?: boolean;
             dumpFlags: any;
         };
         produceOptInfo?: boolean;
@@ -145,6 +153,7 @@ export type CompilationResult = {
     compilationOptions?: string[];
     downloads?: BuildEnvDownloadInfo[];
     gccDumpOutput?: any;
+    cflatDumpOutput?: any;
     languageId?: string;
     result?: CompilationResult; // cmake inner result
 

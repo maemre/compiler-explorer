@@ -36,6 +36,7 @@ import {
     EXECUTOR_COMPONENT_NAME,
     FLAGS_VIEW_COMPONENT_NAME,
     GCC_DUMP_VIEW_COMPONENT_NAME,
+    CFLAT_DUMP_VIEW_COMPONENT_NAME,
     GNAT_DEBUG_TREE_VIEW_COMPONENT_NAME,
     GNAT_DEBUG_VIEW_COMPONENT_NAME,
     HASKELL_CMM_VIEW_COMPONENT_NAME,
@@ -76,6 +77,7 @@ import {HaskellCore as HaskellCoreView} from './panes/haskellcore-view.js';
 import {HaskellStg as HaskellStgView} from './panes/haskellstg-view.js';
 import {HaskellCmm as HaskellCmmView} from './panes/haskellcmm-view.js';
 import {GccDump as GCCDumpView} from './panes/gccdump-view.js';
+import {CflatDump as CflatDumpView} from './panes/cflatdump-view.js';
 import {Cfg as CfgView} from './panes/cfg-view.js';
 import {Conformance as ConformanceView} from './panes/conformance-view.js';
 import {GnatDebugTree as GnatDebugTreeView} from './panes/gnatdebugtree-view.js';
@@ -136,6 +138,7 @@ export class Hub {
         layout.registerComponent(RUST_MACRO_EXP_VIEW_COMPONENT_NAME, (c, s) => this.rustMacroExpViewFactory(c, s));
         layout.registerComponent(RUST_HIR_VIEW_COMPONENT_NAME, (c, s) => this.rustHirViewFactory(c, s));
         layout.registerComponent(GCC_DUMP_VIEW_COMPONENT_NAME, (c, s) => this.gccDumpViewFactory(c, s));
+        layout.registerComponent(CFLAT_DUMP_VIEW_COMPONENT_NAME, (c, s) => this.cflatDumpViewFactory(c, s));
         layout.registerComponent(CFG_VIEW_COMPONENT_NAME, (c, s) => this.cfgViewFactory(c, s));
         layout.registerComponent(CONFORMANCE_VIEW_COMPONENT_NAME, (c, s) => this.conformanceViewFactory(c, s));
 
@@ -519,6 +522,10 @@ export class Hub {
 
     public gccDumpViewFactory(container: GoldenLayout.Container, state: any): any /* typeof GccDumpView */ {
         return new GCCDumpView(this, container, state);
+    }
+
+    public cflatDumpViewFactory(container: GoldenLayout.Container, state: any): any /* typeof CflatDumpView */ {
+        return new CflatDumpView(this, container, state);
     }
 
     public cfgViewFactory(container: GoldenLayout.Container, state: ConstructorParameters<typeof CfgView>[2]): CfgView {

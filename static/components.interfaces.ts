@@ -26,6 +26,7 @@ import {CompilerOutputOptions} from '../types/features/filters.interfaces.js';
 import {CfgState} from './panes/cfg-view.interfaces.js';
 import {LLVMOptPipelineViewState} from './panes/llvm-opt-pipeline.interfaces.js';
 import {GccDumpViewState} from './panes/gccdump-view.interfaces.js';
+import {CflatDumpViewState} from './panes/cflatdump-view.interfaces.js';
 import {ConfiguredOverrides} from './compilation/compiler-overrides.interfaces.js';
 export const COMPILER_COMPONENT_NAME = 'compiler';
 export const EXECUTOR_COMPONENT_NAME = 'executor';
@@ -41,6 +42,7 @@ export const FLAGS_VIEW_COMPONENT_NAME = 'flags';
 export const PP_VIEW_COMPONENT_NAME = 'pp';
 export const AST_VIEW_COMPONENT_NAME = 'ast';
 export const GCC_DUMP_VIEW_COMPONENT_NAME = 'gccdump';
+export const CFLAT_DUMP_VIEW_COMPONENT_NAME = 'cflatdump';
 export const CFG_VIEW_COMPONENT_NAME = 'cfg';
 export const CONFORMANCE_VIEW_COMPONENT_NAME = 'conformance';
 export const IR_VIEW_COMPONENT_NAME = 'ir';
@@ -171,6 +173,14 @@ export type PopulatedAstViewState = StateWithId &
 export type EmptyGccDumpViewState = EmptyState;
 export type PopulatedGccDumpViewState = StateWithId &
     GccDumpViewState & {
+        compilerName: string;
+        editorid: number;
+        treeid: number;
+    };
+
+export type EmptyCflatDumpViewState = EmptyState;
+export type PopulatedCflatDumpViewState = StateWithId &
+    CflatDumpViewState & {
         compilerName: string;
         editorid: number;
         treeid: number;
