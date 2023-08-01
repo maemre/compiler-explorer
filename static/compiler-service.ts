@@ -40,6 +40,9 @@ import {IncludeDownloads, SourceAndFiles} from './download-service.js';
 import {SentryCapture} from './sentry.js';
 
 const ASCII_COLORS_RE = new RegExp(/\x1B\[[\d;]*m(.\[K)?/g);
+// Update this path to your local wasm version of compiler
+import init, {compile_program} from '../../farrago/cflat/wasm-interface/cflat.js';
+import {processAsm} from './process-asm.js';
 
 export class CompilerService {
     private readonly base = window.httpRoot;
@@ -223,6 +226,19 @@ export class CompilerService {
                     localCacheHit: true,
                 };
             }
+        }
+        if (request.lang === 'cflat') {
+            await init();
+            const asm = compile_program(request.source);
+            const result = {
+                source: request.source,
+                ...processAsm(asm, request.options.filters),
+            };
+            return {
+                request: request,
+                result: result,
+                localCacheHit: false,
+            };
         }
         return new Promise((resolve, reject) => {
             const compilerId = encodeURIComponent(request.compiler);
