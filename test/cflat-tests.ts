@@ -39,6 +39,7 @@ const info = {
     lang: languages.Cflat.id,
 } as unknown as CompilerInfo;
 
+// pre-commit hook will run this part and check instantiation
 describe('Basic compiler setup', function () {
     let env: CompilationEnvironment;
 
@@ -51,6 +52,7 @@ describe('Basic compiler setup', function () {
     });
 });
 
+// check if the Cflat compiler compiles our default test LIR program correctly
 describe('cflatp compiling', () => {
     let compiler: CflatCompiler;
     let env: CompilationEnvironment;
