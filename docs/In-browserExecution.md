@@ -12,15 +12,16 @@ different compilers.
 
 ### Installing Prerequisites
 
-```bash=
-brew install node
-node --version
-v18.16.0
+- Download Node.js
 
-brew install npm
-npm --version
-9.5.1
+1. For macOS user, you can enter the following line in the terminal to download Node.js.
+
 ```
+brew install node
+```
+
+2. For windows or other OS user, you can download and install Node.js from the official website:
+   [Download | Node.js](https://nodejs.org/en/download)
 
 ### Generating "cflat.js" from farrago repo
 
