@@ -135,3 +135,73 @@ We would also like to specially thank these people for their contributions to **
 
 Many [amazing sponsors](https://godbolt.org/#sponsors), both individuals and companies, have helped fund and promote
 Compiler Explorer.
+
+# Project: In-browser Execution for Compiler Explorer
+## Information about the project
+### What is compiler explorer?
+Compiler Explorer is an interactive compiler exploration website. Edit code in C, C++, C#, F#, Rust, Go, D, Haskell, Swift, Pascal, ispc, Python, Java, or any of the other 30+ supported languages, and see how that code looks after being compiled in real time. Multiple compilers are supported for each language, many different tools and visualizations are available, and the UI layout is configurable (thanks to GoldenLayout).
+
+### What is our project about?
+This project focuses on enhancing Compiler Explorer (CE) by adapting it to support in-browser compilers. The primary objectives include restructuring the backend by removing the original CE server and integrating WebAssembly (Wasm) code for compiler execution. Additionally, the project aims to add a new feature of running different compiler passes so that users can better understand the compiler process. Furthermore, the project implements another functionality to load different compilers.
+
+## Build process
+### Installing Prerequisites
+```bash=
+pip install node
+node --version
+v18.16.0
+
+pip install npm
+npm --version
+9.5.1
+```
+
+### Generate "cflat.js" from farrago repo
+- Follow the steps in ["README.md"](https://github.com/maemre/farrago/blob/master/cflat/README.md)
+
+
+
+### Running the developer version of this program
+```bash
+# go to the right directory
+cd compiler-explorer/
+
+# run the developer version
+make dev EXTRA_ARGS="--language cflat"
+
+```
+
+### What to expect?
+- Wait until the terminal shows the following lines.
+```
+info:   Listening on http://localhost:10240/
+info:   Startup duration: 13769ms
+info: =======================================
+```
+- Open the [local webpage](http://localhost:10240/) in any browser
+- See the wepage like this
+<img width="1595" alt="Screenshot 2023-08-03 at 18 04 37" src="https://github.com/maemre/compiler-explorer/assets/97008773/117e374a-b61b-4a37-92b3-283a048efd75">
+
+- If you see `<Compilation failed: unreachable>` on the right hand side (as shown below), try to add a new line at the very end of your input codes on the left hand window.
+<img width="1600" alt="Screenshot 2023-08-03 at 18 05 52" src="https://github.com/maemre/compiler-explorer/assets/97008773/f36b16da-57a5-4457-9e13-796a248de3a0">
+
+
+## Test
+
+### Run the test
+```bash=
+make test
+```
+### What to expect?
+The terminal is going to run more than 520 tests, and Cflat compiler contains 2 tests among them. If you find them paased as shown below, you are good to go.
+```bash=
+...
+# The cflat part
+  Basic compiler setup
+    ✔ Should not crash on instantiation
+
+  cflatp compiling
+    ✔ Compiles a simple LIR program
+...
+```
+
