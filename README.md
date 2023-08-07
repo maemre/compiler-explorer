@@ -100,6 +100,11 @@ driver isn't appropriate for your environment. To do this, add a new module in `
 `urlShortenService` variable in configuration. This module should export a single function, see the
 [tinyurl module](lib/shortener/tinyurl.js) for an example.
 
+### Running the compiler in browser
+
+If you want to run your compiler faster or get rid of setting up the backend server and Docker stuff, there is a way to run your compiler in browser. If interested, please see the [In-browser Execution for Compiler Explorer](https://github.com/maemre/compiler-explorer/blob/cflat-language/docs/In-browserExecution.md) for more information.
+
+
 ### RESTful API
 
 There's a simple restful API that can be used to do compiles to asm and to list compilers.
