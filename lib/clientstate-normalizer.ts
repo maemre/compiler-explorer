@@ -195,6 +195,12 @@ export class ClientStateNormalizer {
                 'gccdump',
                 component.componentState._editorid,
             );
+        } else if (component.componentName === 'cflatdump') {
+            this.addSpecialOutputToCompiler(
+                component.componentState._compilerid,
+                'cflatdump',
+                component.componentState._editorid,
+            );
         } else if (component.componentName === 'output') {
             this.addSpecialOutputToCompiler(
                 component.componentState.compiler,
@@ -343,6 +349,19 @@ class GoldenLayoutComponents {
         return {
             type: 'component',
             componentName: 'gccdump',
+            componentState: {
+                _compilerid: compilerIndex,
+                _editorid: customSessionId || (session ? session.id : undefined),
+            },
+            isClosable: true,
+            reorderEnabled: true,
+        };
+    }
+
+    createCflatDumpComponent(session, compilerIndex, customSessionId?) {
+        return {
+            type: 'component',
+            componentName: 'cflatdump',
             componentState: {
                 _compilerid: compilerIndex,
                 _editorid: customSessionId || (session ? session.id : undefined),
@@ -509,6 +528,8 @@ class GoldenLayoutComponents {
             return this.createCfgComponent(session, idxCompiler + 1, customSessionId);
         } else if (viewtype === 'gccdump') {
             return this.createGccDumpComponent(session, idxCompiler + 1, customSessionId);
+        } else if (viewtype === 'cflatdump') {
+            return this.createCflatDumpComponent(session, idxCompiler + 1, customSessionId);
         } else if (viewtype === 'compilerOutput') {
             return this.createCompilerOutComponent(session, idxCompiler + 1, customSessionId);
         }
@@ -523,6 +544,8 @@ class GoldenLayoutComponents {
             return this.createCfgComponent(null, idxCompiler + 1, false);
         } else if (viewtype === 'gccdump') {
             return this.createGccDumpComponent(null, idxCompiler + 1, false);
+        } else if (viewtype === 'cflatdump') {
+            return this.createCflatDumpComponent(null, idxCompiler + 1, false);
         } else if (viewtype === 'compilerOutput') {
             return this.createCompilerOutComponent(null, idxCompiler + 1, false);
         }
@@ -586,6 +609,10 @@ export class ClientStateGoldenifier extends GoldenLayoutComponents {
 
     newGccDumpStackFromCompiler(session, compilerIndex, width) {
         return this.newStackWithOneComponent(width, this.createGccDumpComponent(session, compilerIndex));
+    }
+
+    newCflatDumpStackFromCompiler(session, compilerIndex, width) {
+        return this.newStackWithOneComponent(width, this.createCflatDumpComponent(session, compilerIndex));
     }
 
     newCompilerOutStackFromCompiler(session, compilerIndex, width) {

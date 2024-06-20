@@ -52,6 +52,7 @@ import {CompilerCurrentState, CompilerState} from './compiler.interfaces.js';
 import {ComponentConfig, ToolViewState} from '../components.interfaces.js';
 import {LanguageLibs} from '../options.interfaces.js';
 import {GccDumpFiltersState, GccDumpViewSelectedPass} from './gccdump-view.interfaces.js';
+import {CflatDumpFiltersState, CflatDumpViewSelectedPass} from './cflatdump-view.interfaces.js';
 import {AssemblyInstructionInfo} from '../../lib/asm-docs/base.js';
 import {PPOptions} from './pp-view.interfaces.js';
 import {CompilationStatus} from '../compiler-service.interfaces.js';
@@ -209,6 +210,7 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
     private haskellStgButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
     private haskellCmmButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
     private gccDumpButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
+    private cflatDumpButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
     private cfgButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
     private executorButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
     private libsButton: JQuery<HTMLElementTagNameMap[keyof HTMLElementTagNameMap]>;
@@ -267,6 +269,10 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
     private treeDumpEnabled?: boolean;
     private rtlDumpEnabled?: boolean;
     private ipaDumpEnabled?: boolean;
+    private cflatDumpViewOpen: boolean;
+    private cflatDumpPassSelected?: CflatDumpViewSelectedPass;
+    private inliningDumpEnabled?: boolean;
+    private codeGenDumpEnabled?: boolean;
     private dumpFlags?: DumpFlags;
     private gnatDebugTreeViewOpen: boolean;
     private gnatDebugViewOpen: boolean;
@@ -613,6 +619,16 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
             );
         };
 
+        const createCflatDumpView = () => {
+            return Components.getCflatDumpViewWith(
+                this.id,
+                this.getCompilerName(),
+                this.sourceEditorId ?? 0,
+                this.sourceTreeId ?? 0,
+                this.lastResult?.cflatDumpOutput,
+            );
+        };
+
         const createGnatDebugTreeView = () => {
             return Components.getGnatDebugTreeViewWith(
                 this.id,
@@ -863,11 +879,24 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
             // @ts-ignore
             ._dragListener.on('dragStart', togglePannerAdder);
 
+        this.container.layoutManager
+            .createDragSource(this.cflatDumpButton, createCflatDumpView as any)
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            ._dragListener.on('dragStart', togglePannerAdder);
+
         this.gccDumpButton.on('click', () => {
             const insertPoint =
                 this.hub.findParentRowOrColumn(this.container.parent) ||
                 this.container.layoutManager.root.contentItems[0];
             insertPoint.addChild(createGccDumpView());
+        });
+
+        this.cflatDumpButton.on('click', () => {
+            const insertPoint =
+                this.hub.findParentRowOrColumn(this.container.parent) ||
+                this.container.layoutManager.root.contentItems[0];
+            insertPoint.addChild(createCflatDumpView());
         });
 
         this.container.layoutManager
@@ -1214,6 +1243,13 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
                     treeDump: this.treeDumpEnabled,
                     rtlDump: this.rtlDumpEnabled,
                     ipaDump: this.ipaDumpEnabled,
+                    dumpFlags: this.dumpFlags,
+                },
+                produceCflatDump: {
+                    opened: this.cflatDumpViewOpen,
+                    pass: this.cflatDumpPassSelected,
+                    inliningDump: this.inliningDumpEnabled,
+                    codeGenDump: this.codeGenDumpEnabled,
                     dumpFlags: this.dumpFlags,
                 },
                 produceOptInfo: this.wantOptInfo ?? false,
@@ -2235,6 +2271,12 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         }
     }
 
+    onCflatDumpUIInit(id: number): void {
+        if (this.id === id) {
+            this.compile();
+        }
+    }
+
     onGccDumpFiltersChanged(id: number, dumpOpts: GccDumpFiltersState, reqCompile: boolean): void {
         if (this.id === id) {
             this.treeDumpEnabled = dumpOpts.treeDump;
@@ -2259,9 +2301,29 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         }
     }
 
+    onCflatDumpFiltersChanged(id: number, dumpOpts: CflatDumpFiltersState, reqCompile: boolean): void {
+        if (this.id === id) {
+            this.inliningDumpEnabled = dumpOpts.inliningDump;
+            this.codeGenDumpEnabled = dumpOpts.codeGenDump;
+            if (reqCompile) {
+                this.compile();
+            }
+        }
+    }
+
     onGccDumpPassSelected(id: number, passObject?: GccDumpViewSelectedPass, reqCompile?: boolean) {
         if (this.id === id) {
             this.gccDumpPassSelected = passObject;
+
+            if (reqCompile && passObject != null) {
+                this.compile();
+            }
+        }
+    }
+
+    onCflatDumpPassSelected(id: number, passObject?: CflatDumpViewSelectedPass, reqCompile?: boolean) {
+        if (this.id === id) {
+            this.cflatDumpPassSelected = passObject;
 
             if (reqCompile && passObject != null) {
                 this.compile();
@@ -2276,6 +2338,13 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         }
     }
 
+    onCflatDumpViewOpened(id: number): void {
+        if (this.id === id) {
+            this.cflatDumpButton.prop('disabled', true);
+            this.cflatDumpViewOpen = true;
+        }
+    }
+
     onGccDumpViewClosed(id: number): void {
         if (this.id === id) {
             this.gccDumpButton.prop('disabled', !this.compiler?.supportsGccDump);
@@ -2285,6 +2354,18 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
             delete this.treeDumpEnabled;
             delete this.rtlDumpEnabled;
             delete this.ipaDumpEnabled;
+            delete this.dumpFlags;
+        }
+    }
+
+    onCflatDumpViewClosed(id: number): void {
+        if (this.id === id) {
+            this.cflatDumpButton.prop('disabled', !this.compiler?.supportsCflatDump);
+            this.cflatDumpViewOpen = false;
+
+            delete this.cflatDumpPassSelected;
+            delete this.inliningDumpEnabled;
+            delete this.codeGenDumpEnabled;
             delete this.dumpFlags;
         }
     }
@@ -2383,6 +2464,7 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         this.haskellStgButton = this.domRoot.find('.btn.view-haskellStg');
         this.haskellCmmButton = this.domRoot.find('.btn.view-haskellCmm');
         this.gccDumpButton = this.domRoot.find('.btn.view-gccdump');
+        this.cflatDumpButton = this.domRoot.find('.btn.view-cflatdump');
         this.cfgButton = this.domRoot.find('.btn.view-cfg');
         this.executorButton = this.domRoot.find('.create-executor');
         this.libsButton = this.domRoot.find('.btn.show-libs');
@@ -2659,6 +2741,7 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         this.rustHirButton.prop('disabled', this.rustHirViewOpen);
         this.cfgButton.prop('disabled', this.cfgViewOpen);
         this.gccDumpButton.prop('disabled', this.gccDumpViewOpen);
+        this.cflatDumpButton.prop('disabled', this.cflatDumpViewOpen);
         this.gnatDebugTreeButton.prop('disabled', this.gnatDebugTreeViewOpen);
         this.gnatDebugButton.prop('disabled', this.gnatDebugViewOpen);
         // The executorButton does not need to be changed here, because you can create however
@@ -2678,6 +2761,7 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         this.haskellCmmButton.toggle(!!this.compiler.supportsHaskellCmmView);
         this.cfgButton.toggle(!!this.compiler.supportsCfg);
         this.gccDumpButton.toggle(!!this.compiler.supportsGccDump);
+        this.cflatDumpButton.toggle(!!this.compiler.supportsCflatDump);
         this.gnatDebugTreeButton.toggle(!!this.compiler.supportsGnatDebugViews);
         this.gnatDebugButton.toggle(!!this.compiler.supportsGnatDebugViews);
         this.executorButton.toggle(!!this.compiler.supportsExecute);
@@ -2854,6 +2938,12 @@ export class Compiler extends MonacoPane<monaco.editor.IStandaloneCodeEditor, Co
         this.eventHub.on('gccDumpViewOpened', this.onGccDumpViewOpened, this);
         this.eventHub.on('gccDumpViewClosed', this.onGccDumpViewClosed, this);
         this.eventHub.on('gccDumpUIInit', this.onGccDumpUIInit, this);
+
+        this.eventHub.on('cflatDumpPassSelected', this.onCflatDumpPassSelected, this);
+        this.eventHub.on('cflatDumpFiltersChanged', this.onCflatDumpFiltersChanged, this);
+        this.eventHub.on('cflatDumpViewOpened', this.onCflatDumpViewOpened, this);
+        this.eventHub.on('cflatDumpViewClosed', this.onCflatDumpViewClosed, this);
+        this.eventHub.on('cflatDumpUIInit', this.onCflatDumpUIInit, this);
 
         this.eventHub.on('gnatDebugTreeViewOpened', this.onGnatDebugTreeViewOpened, this);
         this.eventHub.on('gnatDebugTreeViewClosed', this.onGnatDebugTreeViewClosed, this);

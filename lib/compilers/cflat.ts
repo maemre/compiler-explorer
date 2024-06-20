@@ -16,6 +16,12 @@ export class CflatCompiler extends BaseCompiler {
 
     constructor(compilerInfo: PreliminaryCompilerInfo, env) {
         super(compilerInfo, env);
+        this.compiler.supportsIrView = false;
+
+        // Enable Cflat dump code
+        this.compiler.supportsCflatDump = true;
+
+        this.compiler.removeEmptyCflatDump = false;
     }
 
     override getOutputFilename(dirPath: string, outputFilebase: string) {

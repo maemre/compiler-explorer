@@ -218,6 +218,9 @@ export class CompilerService {
     }
 
     public async submit(request: Record<string, any>) {
+        /* eslint-disable no-console */
+        console.log('============Called submit function==============');
+        /* eslint-enable no-console */
         request.allowStoreCodeDebug = this.allowStoreCodeDebug;
         const jsonRequest = JSON.stringify(request);
         if (options.doCache && !request.bypassCache) {
@@ -279,6 +282,9 @@ export class CompilerService {
                     if (result && result.okToCache && options.doCache) {
                         this.cache.set(jsonRequest, result);
                     }
+                    /* eslint-disable no-console */
+                    console.log(result);
+                    /* eslint-enable no-console */
                     resolve({
                         request: request,
                         result: result,
